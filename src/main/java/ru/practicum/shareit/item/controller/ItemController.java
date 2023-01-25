@@ -1,13 +1,14 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -41,13 +42,11 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDto> getByUserId(@RequestHeader(name = "X-Sharer-User-Id") long userId) {
-        List<Item> items = itemService.getByUserId(userId);
-        return items.stream().map(itemMapper::itemToItemDto).collect(Collectors.toList());
+        return itemMapper.itemListToItemDtoList(itemService.getByUserId(userId));
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam(required = false) String text) {
-        List<Item> items = itemService.search(text);
-        return items.stream().map(itemMapper::itemToItemDto).collect(Collectors.toList());
+        return itemMapper.itemListToItemDtoList(itemService.search(text));
     }
 }

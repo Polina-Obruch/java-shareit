@@ -1,30 +1,33 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.core.exception.model.EntityNotFoundException;
-import ru.practicum.shareit.core.exception.model.FailUserIdForItemException;
+import ru.practicum.shareit.core.exception.EntityNotFoundException;
+import ru.practicum.shareit.core.exception.FailUserIdForItemException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ItemService {
+public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
 
-    public Item add(long userId, Item item) {
+    @Override
+    public Item add(Long userId, Item item) {
         log.info("Добавление вещи");
         item.setOwner(userService.getById(userId));
         return itemRepository.add(item);
     }
 
-    public Item update(long itemId, long userId, Item item) {
+    @Override
+    public Item update(Long itemId, Long userId, Item item) {
         log.info(String.format("Обновление вещи c id = %d", itemId));
         //Если пользователя или вещи нет в базе - ошибка NotFound
         User user = userService.getById(userId);
@@ -52,22 +55,26 @@ public class ItemService {
         return itemRepository.update(updateItem);
     }
 
-    public void remove(long itemId) {
+    @Override
+    public void remove(Long itemId) {
         log.info(String.format("Удаление вещи с id = %d", itemId));
         itemRepository.remove(itemId);
     }
 
-    public Item getByItemId(long itemId) {
+    @Override
+    public Item getByItemId(Long itemId) {
         log.info(String.format("Выдача вещи с id = %d", itemId));
         return itemRepository.getByItemId(itemId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
     }
 
-    public List<Item> getByUserId(long userId) {
+    @Override
+    public List<Item> getByUserId(Long userId) {
         log.info(String.format("Выдача вещей пользователя с id = %d",userId));
         return itemRepository.getByUserId(userId);
     }
 
+    @Override
     public List<Item> search(String text) {
         log.info(String.format("Выдача вещи по поиску строки = %s", text));
         return itemRepository.getByText(text);

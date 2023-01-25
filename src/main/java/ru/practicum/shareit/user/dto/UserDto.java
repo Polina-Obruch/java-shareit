@@ -7,6 +7,8 @@ import javax.validation.constraints.NotBlank;
 
 @Value
 public class UserDto {
+    Long id;
+
     @NotBlank(message = "Name is required")
     String name;
 

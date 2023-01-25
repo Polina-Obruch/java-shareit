@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserRepository {
     List<User> getAll();
 
-    Optional<User> getById(long id);
+    Optional<User> getById(Long id);
 
     Optional<User> getByEmail(String email);
 
@@ -16,5 +16,5 @@ public interface UserRepository {
 
     User update(User user);
 
-    void remove(long id);
+    void remove(Long id);
 }

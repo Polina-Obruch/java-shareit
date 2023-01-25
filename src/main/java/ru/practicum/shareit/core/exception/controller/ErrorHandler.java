@@ -1,4 +1,4 @@
-package ru.practicum.shareit.core.exception;
+package ru.practicum.shareit.core.exception.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -9,6 +9,9 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.practicum.shareit.core.exception.DuplicateEmailException;
+import ru.practicum.shareit.core.exception.EntityNotFoundException;
+import ru.practicum.shareit.core.exception.FailUserIdForItemException;
 import ru.practicum.shareit.core.exception.model.*;
 
 import java.util.Map;

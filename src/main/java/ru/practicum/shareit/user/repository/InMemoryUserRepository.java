@@ -19,7 +19,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User add(User user) {
-        log.debug("Запрос к БД на добавление пользователя");
+        log.info("Запрос к БД на добавление пользователя");
         long id = getId();
         user.setId(id);
         userMap.put(id, user);
@@ -33,7 +33,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public void remove(long id) {
+    public void remove(Long id) {
         userMap.remove(id);
     }
 
@@ -43,7 +43,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public Optional<User> getById(long id) {
+    public Optional<User> getById(Long id) {
         return Optional.ofNullable(userMap.get(id));
     }
 
