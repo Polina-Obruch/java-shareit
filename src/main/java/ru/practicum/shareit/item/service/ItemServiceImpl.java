@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,15 +23,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item add(Long userId, Item item) {
         log.info("Добавление вещи");
-        item.setOwner(userService.getById(userId));
-        return itemRepository.add(item);
+        item.setOwner(userService.getByUserId(userId));
+        return itemRepository.save(item);
     }
 
     @Override
     public Item update(Long itemId, Long userId, Item item) {
         log.info(String.format("Обновление вещи c id = %d", itemId));
         //Если пользователя или вещи нет в базе - ошибка NotFound
-        User user = userService.getById(userId);
+        User user = userService.getByUserId(userId);
         Item updateItem = this.getByItemId(itemId);
         User owner = updateItem.getOwner();
 
@@ -52,31 +53,34 @@ public class ItemServiceImpl implements ItemService {
             updateItem.setAvailable(item.getAvailable());
         }
 
-        return itemRepository.update(updateItem);
+        return itemRepository.save(updateItem);
     }
 
     @Override
     public void remove(Long itemId) {
         log.info(String.format("Удаление вещи с id = %d", itemId));
-        itemRepository.remove(itemId);
+        itemRepository.deleteById(itemId);
     }
 
     @Override
     public Item getByItemId(Long itemId) {
         log.info(String.format("Выдача вещи с id = %d", itemId));
-        return itemRepository.getByItemId(itemId).orElseThrow(() ->
+        return itemRepository.findById(itemId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
     }
 
     @Override
     public List<Item> getByUserId(Long userId) {
         log.info(String.format("Выдача вещей пользователя с id = %d",userId));
-        return itemRepository.getByUserId(userId);
+        return itemRepository.findByOwnerId(userId);
     }
 
     @Override
     public List<Item> search(String text) {
-        log.info(String.format("Выдача вещи по поиску строки = %s", text));
-        return itemRepository.getByText(text);
+        log.info(String.format("Выдача вещи по поиску строки = %s", text.toLowerCase()));
+         if ( text.isBlank()) {
+             return Collections.emptyList();
+         }
+        return itemRepository.findByText("%"+text.toLowerCase()+"%");
     }
 }
