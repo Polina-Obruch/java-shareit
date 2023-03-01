@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
-import ru.practicum.shareit.core.exception.FailUserIdForItemException;
+import ru.practicum.shareit.core.exception.FailIdException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -32,11 +32,11 @@ public class ItemServiceImpl implements ItemService {
         log.info(String.format("Обновление вещи c id = %d", itemId));
         //Если пользователя или вещи нет в базе - ошибка NotFound
         User user = userService.getByUserId(userId);
-        Item updateItem = this.getByItemId(itemId);
+        Item updateItem = this.getByItemId(itemId, userId);
         User owner = updateItem.getOwner();
 
         if (!user.equals(owner)) {
-            throw new FailUserIdForItemException(
+            throw new FailIdException(
                     String.format("Обновлять информацию по предмету с id = %d может только пользователь с id = %d",
                             itemId, owner.getId()));
         }
@@ -63,24 +63,24 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item getByItemId(Long itemId) {
+    public Item getByItemId(Long itemId, Long userId) {
         log.info(String.format("Выдача вещи с id = %d", itemId));
         return itemRepository.findById(itemId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
     }
 
     @Override
-    public List<Item> getByUserId(Long userId) {
-        log.info(String.format("Выдача вещей пользователя с id = %d",userId));
-        return itemRepository.findByOwnerId(userId);
+    public List<Item> getByOwnerId(Long ownerId) {
+        log.info(String.format("Выдача вещей владельца с id = %d", ownerId));
+        return itemRepository.findByOwnerId(ownerId);
     }
 
     @Override
     public List<Item> search(String text) {
         log.info(String.format("Выдача вещи по поиску строки = %s", text.toLowerCase()));
-         if ( text.isBlank()) {
-             return Collections.emptyList();
-         }
-        return itemRepository.findByText("%"+text.toLowerCase()+"%");
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
+        return itemRepository.findByText("%" + text.toLowerCase() + "%");
     }
 }

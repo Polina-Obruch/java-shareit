@@ -11,9 +11,10 @@ public interface ItemService {
 
     void remove(Long itemId);
 
-    Item getByItemId(Long itemId);
+    Item getByItemId(Long itemId, Long userId);
 
-    List<Item> getByUserId(Long userId);
+    List<Item> getByOwnerId(Long ownerId);
 
     List<Item> search(String text);
+
 }

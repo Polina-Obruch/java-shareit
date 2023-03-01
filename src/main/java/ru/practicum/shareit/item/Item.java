@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.*;
 import org.hibernate.Hibernate;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
@@ -28,6 +29,12 @@ public class Item {
     @JoinColumn(name = "OWNER_ID")
     private User owner;
     private Long request;
+
+    @Transient
+    private BookingShortDto lastBooking;
+
+    @Transient
+    private BookingShortDto nextBooking;
 
     @Override
     public boolean equals(Object o) {
