@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.core.exception.*;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -21,12 +21,13 @@ import java.util.Objects;
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
 
     @Override
     public Booking add(Long bookerId, Long itemId, Booking booking) {
         User booker = userService.getByUserId(bookerId);
-        Item item = itemService.getByItemId(itemId, bookerId);
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
 
         if (!item.getAvailable()) {
             throw new ItemNotAvailableException(String.format("Предмет с id = %d не доступен", itemId));
@@ -83,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getAllBookingByOwnerId(Long ownerId, State state) {
-        List<Item> items = itemService.getByOwnerId(ownerId);
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
         // Если нет вещей этого пользователя в базе - ошибка
         if (items.isEmpty()) {
             throw new FailIdException(String.format(
@@ -133,20 +134,21 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking getNextBookingByItemId(Long itemId) {
-        return bookingRepository.findFirstByItemIdLikeAndStartAfterOrderByStartDesc(itemId, LocalDateTime.now());
+        return bookingRepository.findFirstByItemIdAndStartAfterOrderByStart(itemId, LocalDateTime.now());
     }
 
     @Override
     public Booking getLastBookingByItemId(Long itemId) {
-        return bookingRepository.findFirstByItemIdLikeAndEndBeforeOrderByEnd(itemId, LocalDateTime.now());
+        return bookingRepository.findFirstByItemIdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());
     }
 
     private void checkTimeValidation(Booking booking) {
         boolean isStartInPast = booking.getStart().isBefore(LocalDateTime.now());
         boolean isEndInPast = booking.getEnd().isBefore(LocalDateTime.now());
         boolean isEndBeforeStart = booking.getEnd().isBefore(booking.getStart());
+        boolean isEndEqualStart = booking.getEnd().isEqual(booking.getStart());
 
-        if (isStartInPast || isEndInPast || isEndBeforeStart) {
+        if (isStartInPast || isEndInPast || isEndBeforeStart || isEndEqualStart) {
             throw new ValidationException("Время броннирование указано неверно");
         }
     }

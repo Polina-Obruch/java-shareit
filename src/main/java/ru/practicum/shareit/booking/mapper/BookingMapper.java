@@ -17,8 +17,7 @@ public interface BookingMapper {
 
     List<BookingAnswerDto> bookingListToListBookingAnswerDto(List<Booking> bookings);
 
-    @Mapping(target = "bookerId", source = "booking.booker.id")
+    @Mapping(target = "bookerId", source = "booker.id")
     BookingShortDto bookingToBookingShortDto(Booking booking);
 
-    List<BookingShortDto> bookingListToListBookingShortDto(List<Booking> bookings);
 }

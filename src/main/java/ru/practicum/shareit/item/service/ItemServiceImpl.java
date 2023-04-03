@@ -3,15 +3,26 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.State;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
 import ru.practicum.shareit.core.exception.FailIdException;
+import ru.practicum.shareit.core.exception.ValidationException;
+import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +30,10 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
+    private final BookingService bookingService;
+    private final BookingMapper bookingMapper;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Override
     public Item add(Long userId, Item item) {
@@ -65,14 +80,33 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item getByItemId(Long itemId, Long userId) {
         log.info(String.format("Выдача вещи с id = %d", itemId));
-        return itemRepository.findById(itemId).orElseThrow(() ->
+
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
+
+        //Если выдачу вещи запросил владелец - нужно добавить даты ближайших броннирований
+        if (Objects.equals(item.getOwner().getId(), userId)) {
+            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(itemId)));
+            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(itemId)));
+        }
+
+        item.setComments(commentMapper.commentListToCommentDtoList(commentRepository.findAllByItemId(itemId)));
+
+        return item;
     }
 
     @Override
     public List<Item> getByOwnerId(Long ownerId) {
         log.info(String.format("Выдача вещей владельца с id = %d", ownerId));
-        return itemRepository.findByOwnerId(ownerId);
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
+
+        List<Item> itemListWithBooking = items.stream().peek(item -> {
+            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(item.getId())));
+            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(item.getId())));
+            item.setComments(commentMapper.commentListToCommentDtoList(commentRepository.findAllByItemId(item.getId())));
+        }).collect(Collectors.toList());
+
+        return itemListWithBooking;
     }
 
     @Override
@@ -83,4 +117,33 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemRepository.findByText("%" + text.toLowerCase() + "%");
     }
+
+    @Override
+    public Comment addComment(Long itemId, Long userId, Comment comment) {
+
+        Item item = this.getByItemId(itemId, userId);
+        User user = userService.getByUserId(userId);
+        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId, State.PAST);
+
+        //Проверка на наличие аренды этой вещи этим пользователем
+        List<Booking> bookingsForItem = bookings.stream().map(booking -> {
+            boolean isBooking = Objects.equals(booking.getItem().getId(), item.getId());
+            if (isBooking) {
+                return booking;
+            }
+            return null;
+        }).collect(Collectors.toList());
+
+        if (bookingsForItem.isEmpty()) {
+            throw new ValidationException(
+                    String.format("Оставлять комментарий по предмету с id = %d можно только после взятия в аренду", itemId));
+        }
+
+        comment.setItem(item);
+        comment.setAuthor(user);
+        comment.setCreated(LocalDateTime.now());
+
+        return commentRepository.save(comment);
+    }
+
 }

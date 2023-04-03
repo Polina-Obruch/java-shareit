@@ -9,12 +9,12 @@ import javax.validation.constraints.NotNull;
 public class ItemDto {
     Long id;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "Название предмета не может быть пустым")
     String name;
 
-    @NotBlank(message = "Description is required")
+    @NotBlank(message = "Описание предмета не может быть пустым")
     String description;
 
-    @NotNull(message = "Available is required")
+    @NotNull(message = "Параметр available не может быть пустым")
     Boolean available;
 }

@@ -2,19 +2,13 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.dto.ItemGetDto;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.UpdateItemDto;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -24,8 +18,7 @@ public class ItemController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
     private final ItemMapper itemMapper;
-    private final BookingService bookingService;
-    private final BookingMapper bookingMapper;
+    private final CommentMapper commentMapper;
 
     @PostMapping
     public ItemDto add(@RequestHeader(name = USER_ID_HEADER) long userId, @Valid @RequestBody ItemDto itemDto) {
@@ -46,29 +39,27 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemGetDto getByItemId(@PathVariable long itemId, @RequestHeader(name = USER_ID_HEADER) long userId) {
-        Item item = itemService.getByItemId(itemId, userId);
-
-        if (Objects.equals(item.getOwner().getId(), userId)) {
-            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(itemId)));
-            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(itemId)));
-        }
-        return itemMapper.itemToItemGetDto(item);
+        return itemMapper.itemToItemGetDto(itemService.getByItemId(itemId, userId));
     }
 
     @GetMapping
     public List<ItemGetDto> getByOwnerId(@RequestHeader(name = USER_ID_HEADER) long ownerId) {
-        List<Item> items = itemService.getByOwnerId(ownerId);
-
-       List<Item> itemListWithBooking = items.stream().peek(item -> {
-            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(item.getId())));
-            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(item.getId())));
-       }).collect(Collectors.toList());
-
-        return itemMapper.itemListToItemGetDtoList(itemListWithBooking);
+        return itemMapper.itemListToItemGetDtoList(itemService.getByOwnerId(ownerId));
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam(required = false) String text) {
         return itemMapper.itemListToItemDtoList(itemService.search(text));
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto comment(
+            @PathVariable long itemId,
+            @RequestHeader(name = USER_ID_HEADER) long userId,
+            @Valid @RequestBody AddCommentDto addCommentDto
+            ) {
+
+        return commentMapper.commentToCommentDto(
+                itemService.addComment(itemId, userId, commentMapper.addCommentDtoToComment(addCommentDto)));
     }
 }
