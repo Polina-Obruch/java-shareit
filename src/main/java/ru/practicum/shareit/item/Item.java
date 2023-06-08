@@ -50,7 +50,6 @@ public class Item {
 
     @Override
     public int hashCode() {
-
         return getClass().hashCode();
     }
 }
