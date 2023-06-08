@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    List<Item> findByOwnerId(Long userId);
+    List<Item> findAllByOwnerId(Long userId);
 
     @Query(value = "SELECT * FROM ITEMS i " +
             "WHERE LOWER(i.NAME) LIKE ?1 OR LOWER(i.DESCRIPTION) LIKE ?1 " +

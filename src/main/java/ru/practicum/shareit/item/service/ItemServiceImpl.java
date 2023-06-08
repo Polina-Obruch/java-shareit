@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.State;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
 import ru.practicum.shareit.core.exception.FailIdException;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
+    private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserService userService;
     private final BookingService bookingService;
@@ -86,8 +89,10 @@ public class ItemServiceImpl implements ItemService {
 
         //Если выдачу вещи запросил владелец - нужно добавить даты ближайших броннирований
         if (Objects.equals(item.getOwner().getId(), userId)) {
-            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(itemId)));
-            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(itemId)));
+            List<Booking> bookings = bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(itemId, BookingStatus.APPROVED);
+
+            item.setNextBooking(bookingMapper.bookingToBookingShortDto(getNextBooking(bookings)));
+            item.setLastBooking(bookingMapper.bookingToBookingShortDto(getLastBooking(bookings)));
         }
 
         item.setComments(commentMapper.commentListToCommentDtoList(commentRepository.findAllByItemId(itemId)));
@@ -98,15 +103,18 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<Item> getByOwnerId(Long ownerId) {
         log.info(String.format("Выдача вещей владельца с id = %d", ownerId));
-        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
 
-        List<Item> itemListWithBooking = items.stream().peek(item -> {
-            item.setNextBooking(bookingMapper.bookingToBookingShortDto(bookingService.getNextBookingByItemId(item.getId())));
-            item.setLastBooking(bookingMapper.bookingToBookingShortDto(bookingService.getLastBookingByItemId(item.getId())));
+        return items.stream().map(item -> {
+            List<Booking> bookings = bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(item.getId(), BookingStatus.APPROVED);
+
+            item.setNextBooking(bookingMapper.bookingToBookingShortDto(getNextBooking(bookings)));
+            item.setLastBooking(bookingMapper.bookingToBookingShortDto(getLastBooking(bookings)));
             item.setComments(commentMapper.commentListToCommentDtoList(commentRepository.findAllByItemId(item.getId())));
-        }).collect(Collectors.toList());
 
-        return itemListWithBooking;
+            return item;
+
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -146,4 +154,20 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
+    private Booking getNextBooking(List<Booking> bookings) {
+        List<Booking> filteredBookings = bookings.stream()
+                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        return filteredBookings.isEmpty() ? null : filteredBookings.get(0);
+    }
+
+    private Booking getLastBooking(List<Booking> bookings) {
+        List<Booking> filteredBookings = bookings.stream()
+                .filter(booking -> (booking.getEnd().isAfter(LocalDateTime.now())
+                        && booking.getStart().isBefore(LocalDateTime.now())) || booking.getEnd().isBefore(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        return filteredBookings.isEmpty() ? null : filteredBookings.get(filteredBookings.size() - 1);
+    }
 }

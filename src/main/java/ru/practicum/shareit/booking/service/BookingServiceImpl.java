@@ -84,7 +84,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getAllBookingByOwnerId(Long ownerId, State state) {
-        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
         // Если нет вещей этого пользователя в базе - ошибка
         if (items.isEmpty()) {
             throw new FailIdException(String.format(
@@ -130,16 +130,6 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new StatusException();
         }
-    }
-
-    @Override
-    public Booking getNextBookingByItemId(Long itemId) {
-        return bookingRepository.findFirstByItemIdAndStartAfterOrderByStart(itemId, LocalDateTime.now());
-    }
-
-    @Override
-    public Booking getLastBookingByItemId(Long itemId) {
-        return bookingRepository.findFirstByItemIdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());
     }
 
     private void checkTimeValidation(Booking booking) {
