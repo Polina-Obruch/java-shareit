@@ -30,7 +30,6 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "OWNER_ID")
     private User owner;
-    private Long request;
 
     @Transient
     private BookingShortDto lastBooking;
@@ -51,6 +50,7 @@ public class Item {
 
     @Override
     public int hashCode() {
+
         return getClass().hashCode();
     }
 }
