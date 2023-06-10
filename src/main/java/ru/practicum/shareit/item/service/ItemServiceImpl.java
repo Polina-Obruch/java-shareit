@@ -3,7 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Booking;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.model.State;
@@ -12,12 +13,12 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
 import ru.practicum.shareit.core.exception.FailIdException;
 import ru.practicum.shareit.core.exception.ValidationException;
-import ru.practicum.shareit.item.Comment;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
@@ -38,6 +40,9 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
 
+    //В методе вызывается другой @Transactional-метод.
+    // Все будет в одной (существующей) транзакции так как по умолчанию : Propagation.REQUIRED
+    @Transactional
     @Override
     public Item add(Long userId, Item item) {
         log.info("Добавление вещи");
@@ -45,6 +50,7 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.save(item);
     }
 
+    @Transactional
     @Override
     public Item update(Long itemId, Long userId, Item item) {
         log.info(String.format("Обновление вещи c id = %d", itemId));
@@ -55,8 +61,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (!user.equals(owner)) {
             throw new FailIdException(
-                    String.format("Обновлять информацию по предмету с id = %d может только пользователь с id = %d",
-                            itemId, owner.getId()));
+                    String.format("Вы не можете обновлять информацию по предмету с id = %d", itemId));
         }
 
         if (item.getName() != null) {
@@ -74,6 +79,7 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.save(updateItem);
     }
 
+    @Transactional
     @Override
     public void remove(Long itemId) {
         log.info(String.format("Удаление вещи с id = %d", itemId));
@@ -126,12 +132,13 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findByText("%" + text.toLowerCase() + "%");
     }
 
+    @Transactional
     @Override
     public Comment addComment(Long itemId, Long userId, Comment comment) {
 
         Item item = this.getByItemId(itemId, userId);
         User user = userService.getByUserId(userId);
-        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId, State.PAST);
+        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId, String.valueOf(State.PAST));
 
         //Проверка на наличие аренды этой вещи этим пользователем
         List<Booking> bookingsForItem = bookings.stream().map(booking -> {

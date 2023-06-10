@@ -58,7 +58,6 @@ public class ItemController {
             @RequestHeader(name = USER_ID_HEADER) long userId,
             @Valid @RequestBody AddCommentDto addCommentDto
             ) {
-
         return commentMapper.commentToCommentDto(
                 itemService.addComment(itemId, userId, commentMapper.addCommentDtoToComment(addCommentDto)));
     }

@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.core.exception.StatusException;
 
 
 import javax.validation.Valid;
@@ -41,35 +39,21 @@ public class BookingController {
     public BookingAnswerDto approved(@PathVariable long bookingId,
                                      @RequestHeader(name = USER_ID_HEADER) long ownerId,
                                      @RequestParam boolean approved) {
-        try {
-            return bookingMapper.bookingToBookingAnswerDto(
-                    bookingService.approved(bookingId, ownerId, approved));
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
-        }
+        return bookingMapper.bookingToBookingAnswerDto(
+                bookingService.approved(bookingId, ownerId, approved));
     }
 
     @GetMapping
-    public List<BookingAnswerDto> getAllByBooker(
-            @RequestHeader(name = USER_ID_HEADER) long bookerId,
-            @RequestParam(defaultValue = "ALL") String state) {
-        try {
-            return bookingMapper.bookingListToListBookingAnswerDto(
-                    bookingService.getAllBookingByBookerId(bookerId, State.valueOf(state)));
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
-        }
+    public List<BookingAnswerDto> getAllByBooker(@RequestHeader(name = USER_ID_HEADER) long bookerId,
+                                                 @RequestParam(defaultValue = "ALL") String state) {
+        return bookingMapper.bookingListToListBookingAnswerDto(
+                bookingService.getAllBookingByBookerId(bookerId, state));
     }
 
     @GetMapping("/owner")
-    public List<BookingAnswerDto> getAllByOwner(
-            @RequestHeader(name = USER_ID_HEADER) long ownerId,
-            @RequestParam(defaultValue = "ALL") String state) {
-        try {
-            return bookingMapper.bookingListToListBookingAnswerDto(
-                    bookingService.getAllBookingByOwnerId(ownerId, State.valueOf(state)));
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
-        }
+    public List<BookingAnswerDto> getAllByOwner(@RequestHeader(name = USER_ID_HEADER) long ownerId,
+                                                @RequestParam(defaultValue = "ALL") String state) {
+        return bookingMapper.bookingListToListBookingAnswerDto(
+                bookingService.getAllBookingByOwnerId(ownerId, state));
     }
 }
