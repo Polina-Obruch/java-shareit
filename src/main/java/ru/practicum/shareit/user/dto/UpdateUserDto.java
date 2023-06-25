@@ -8,6 +8,6 @@ import javax.validation.constraints.Email;
 public class UpdateUserDto {
     String name;
 
-    @Email(message = "Email is incorrect")
+    @Email(message = "Введите правильный email")
     String email;
 }

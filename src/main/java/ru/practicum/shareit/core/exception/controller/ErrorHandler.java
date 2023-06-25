@@ -9,9 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.practicum.shareit.core.exception.DuplicateEmailException;
-import ru.practicum.shareit.core.exception.EntityNotFoundException;
-import ru.practicum.shareit.core.exception.FailUserIdForItemException;
+import ru.practicum.shareit.core.exception.*;
 import ru.practicum.shareit.core.exception.model.*;
 
 import java.util.Map;
@@ -33,6 +31,13 @@ public class ErrorHandler {
         return new ValidationErrorResponse(errors);
     }
 
+    @ExceptionHandler (value = {ItemNotAvailableException.class, ValidationException.class, StatusException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidation(final RuntimeException exp) {
+        log.error(exp.getMessage());
+        return new ErrorResponse(exp.getMessage());
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicateLike(final DuplicateEmailException exp) {
@@ -40,16 +45,9 @@ public class ErrorHandler {
         return new ErrorResponse(exp.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler (value = {FailIdException.class, EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleFailId(final FailUserIdForItemException exp) {
-        log.error(exp.getMessage());
-        return new ErrorResponse(exp.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleEntityNotFound(final EntityNotFoundException exp) {
+    public ErrorResponse handleFailId(final RuntimeException exp) {
         log.error(exp.getMessage());
         return new ErrorResponse(exp.getMessage());
     }
@@ -67,5 +65,4 @@ public class ErrorHandler {
         log.error("Произошла непредвиденная ошибка.{}", exp.getMessage(), exp);
         return new ErrorResponse("Произошла непредвиденная ошибка.");
     }
-
 }
