@@ -2,12 +2,12 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
@@ -18,6 +18,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.Request;
+import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -39,14 +41,19 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final RequestService requestService;
 
     //В методе вызывается другой @Transactional-метод.
     // Все будет в одной (существующей) транзакции так как по умолчанию : Propagation.REQUIRED
     @Transactional
     @Override
-    public Item add(Long userId, Item item) {
+    public Item add(Long userId, Long requestId, Item item) {
         log.info("Добавление вещи");
         item.setOwner(userService.getByUserId(userId));
+        if (requestId != null) {
+           Request request = requestService.getByRequestId(requestId);
+           item.setRequest(request);
+        }
         return itemRepository.save(item);
     }
 
@@ -107,9 +114,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> getByOwnerId(Long ownerId) {
+    public List<Item> getByOwnerId(Long ownerId, Pageable pageable) {
         log.info(String.format("Выдача вещей владельца с id = %d", ownerId));
-        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
+        List<Item> items = itemRepository.findAllByOwnerId(ownerId, pageable);
 
         return items.stream().map(item -> {
             List<Booking> bookings = bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(item.getId(), BookingStatus.APPROVED);
@@ -124,12 +131,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> search(String text) {
+    public List<Item> search(String text, Pageable pageable) {
         log.info(String.format("Выдача вещи по поиску строки = %s", text.toLowerCase()));
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findByText("%" + text.toLowerCase() + "%");
+        return itemRepository.findByText("%" + text.toLowerCase() + "%", pageable);
     }
 
     @Transactional
@@ -138,7 +145,7 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = this.getByItemId(itemId, userId);
         User user = userService.getByUserId(userId);
-        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId, String.valueOf(State.PAST));
+        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId);
 
         //Проверка на наличие аренды этой вещи этим пользователем
         List<Booking> bookingsForItem = bookings.stream().map(booking -> {

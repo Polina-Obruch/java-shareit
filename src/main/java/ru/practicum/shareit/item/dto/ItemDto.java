@@ -1,11 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Value;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-@Value
+@Getter
+@Setter
+@Builder
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemDto {
     Long id;
 
@@ -17,4 +22,6 @@ public class ItemDto {
 
     @NotNull(message = "Параметр available не может быть пустым")
     Boolean available;
+
+    Long requestId;
 }

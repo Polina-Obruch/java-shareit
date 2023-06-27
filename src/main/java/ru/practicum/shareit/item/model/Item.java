@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -39,6 +40,10 @@ public class Item {
 
     @Transient
     private List<CommentDto> comments;
+
+    @ManyToOne
+    @JoinColumn(name = "REQUEST_ID")
+    private Request request;
 
     @Override
     public boolean equals(Object o) {

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.core.mapper.PaginationMapper;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -22,7 +23,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto add(@RequestHeader(name = USER_ID_HEADER) long userId, @Valid @RequestBody ItemDto itemDto) {
-        return itemMapper.itemToItemDto(itemService.add(userId, itemMapper.itemDtoToItem(itemDto)));
+        return itemMapper.itemToItemDto(itemService.add(userId, itemDto.getRequestId(), itemMapper.itemDtoToItem(itemDto)));
     }
 
     @PatchMapping("/{itemId}")
@@ -43,13 +44,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemGetDto> getByOwnerId(@RequestHeader(name = USER_ID_HEADER) long ownerId) {
-        return itemMapper.itemListToItemGetDtoList(itemService.getByOwnerId(ownerId));
+    public List<ItemGetDto> getByOwnerId(@RequestHeader(name = USER_ID_HEADER) long ownerId,
+                                         @RequestParam(required = false) Integer from,
+                                         @RequestParam(required = false) Integer size) {
+        return itemMapper.itemListToItemGetDtoList(itemService.getByOwnerId(ownerId, PaginationMapper.toMakePage(from, size)));
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam(required = false) String text) {
-        return itemMapper.itemListToItemDtoList(itemService.search(text));
+    public List<ItemDto> search(@RequestParam(required = false) String text,
+                                @RequestParam(required = false) Integer from,
+                                @RequestParam(required = false) Integer size) {
+        return itemMapper.itemListToItemDtoList(itemService.search(text,PaginationMapper.toMakePage(from, size)));
     }
 
     @PostMapping("/{itemId}/comment")
