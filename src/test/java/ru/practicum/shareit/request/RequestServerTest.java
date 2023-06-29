@@ -150,8 +150,8 @@ public class RequestServerTest {
     @Test
     void getAllRequests_shouldReturnValidationException() {
         assertThatThrownBy(() ->
-                requestService.getAllRequest(userId, PaginationMapper.toMakePage(0, 0))).
-                isInstanceOf(ValidationException.class);
+                requestService.getAllRequest(userId, PaginationMapper.toMakePage(0, 0)))
+                .isInstanceOf(ValidationException.class);
 
     }
 

@@ -47,8 +47,8 @@ public class RequestServiceImpl implements RequestService {
         log.info(String.format("Выдача запросов пользователя c id = %d", ownerId));
         //проверка наличия пользователя отправившего запрос
         userService.getByUserId(ownerId);
-        return requestRepository.findAllByUserIdOrderByCreatedDesc(ownerId).
-                stream().map(this::addItemsForRequest).collect(Collectors.toList());
+        return requestRepository.findAllByUserIdOrderByCreatedDesc(ownerId)
+                .stream().map(this::addItemsForRequest).collect(Collectors.toList());
     }
 
     @Override
@@ -56,8 +56,8 @@ public class RequestServiceImpl implements RequestService {
         log.info("Выдача всех запросов");
         //проверка наличия пользователя отправившего запрос
         userService.getByUserId(userId);
-        return requestRepository.findAllByUserIdNotOrderByCreatedDesc(userId, pageable).
-                stream().map(this::addItemsForRequest).collect(Collectors.toList());
+        return requestRepository.findAllByUserIdNotOrderByCreatedDesc(userId, pageable)
+                .stream().map(this::addItemsForRequest).collect(Collectors.toList());
     }
 
     @Override
