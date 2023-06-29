@@ -10,7 +10,6 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
 @Table(name = "COMMENTS")
 @Entity
 @AllArgsConstructor
@@ -40,10 +39,5 @@ public class Comment {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Comment comment = (Comment) o;
         return id != null && Objects.equals(id, comment.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 }

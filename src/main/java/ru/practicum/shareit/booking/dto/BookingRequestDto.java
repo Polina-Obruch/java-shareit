@@ -1,24 +1,23 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
-@RequiredArgsConstructor
-@Value
+@Setter
 public class BookingRequestDto {
     @NotNull(message = "Необходимо указать id предмета")
-    Long itemId;
+    private Long itemId;
 
     @NotNull(message = "Необходимо указать время начала бронирования")
-    LocalDateTime start;
+    private LocalDateTime start;
 
     @NotNull(message = "Необходимо указать время окончания бронирования")
-    LocalDateTime end;
+    private LocalDateTime end;
 }

@@ -13,7 +13,6 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
 @Builder
 @Entity
 @Table(name = "ITEMS")
@@ -51,10 +50,5 @@ public class Item {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Item item = (Item) o;
         return id != null && Objects.equals(id, item.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 }

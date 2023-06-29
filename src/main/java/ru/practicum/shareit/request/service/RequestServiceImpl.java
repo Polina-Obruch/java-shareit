@@ -67,6 +67,7 @@ public class RequestServiceImpl implements RequestService {
                 -> new EntityNotFoundException(String.format("Запрос с id = %d не найден в базе", requestId)));
     }
 
+    @Override
     public RequestWithItemDto getByRequestIdWithItem(Long requestId, Long userId) {
         log.info(String.format("Выдача запроса вместе с ответами id = %d", requestId));
         // проверка наличия пользователя отправившего запрос
