@@ -65,10 +65,10 @@ public class RequestControllerTest {
                 1L,
                 "John",
                 "john.doe@mail.com");
-        request = new Request(requestId,"description", LocalDateTime.now(),user);
+        request = new Request(requestId, "description", LocalDateTime.now(), user);
 
-       requestWithItemDto = new RequestWithItemDto(requestId,request.getDescription(),
-               LocalDateTime.now(), List.of(new ItemDto()));
+        requestWithItemDto = new RequestWithItemDto(requestId, request.getDescription(),
+                LocalDateTime.now(), List.of(new ItemDto()));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class RequestControllerTest {
 
 
         when(requestMapper.requestAddDtoToRequest(requestAddDto)).thenReturn(request);
-        when(requestService.add(any(),any())).thenReturn(request);
+        when(requestService.add(any(), any())).thenReturn(request);
         when(requestMapper.requestToRequestAnswerDto(
                 requestService.add(userId, requestMapper.requestAddDtoToRequest(requestAddDto))))
                 .thenReturn(requestAnswerDto);

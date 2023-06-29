@@ -105,8 +105,8 @@ public class RequestServerTest {
 
     @Test
     void getAllRequestsByOwnerId_shouldReturnListOfRequests() {
-        List<Request> requests = List.of( request);
-        List<ItemDto> items = List.of( itemDto);
+        List<Request> requests = List.of(request);
+        List<ItemDto> items = List.of(itemDto);
 
         when(userService.getByUserId((userId))).thenReturn(user);
         when(itemMapper.itemListToItemDtoList(any())).thenReturn(items);
@@ -128,36 +128,36 @@ public class RequestServerTest {
     @Test
     void getByRequestId_shouldThrowEntityNotFoundException() {
         when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
-        assertThatThrownBy(()-> requestService.getByRequestId(requestId))
+        assertThatThrownBy(() -> requestService.getByRequestId(requestId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void getAllRequests_shouldReturnListOfRequests() {
-        List<Request> requests = List.of( request);
-        List<ItemDto> items = List.of( itemDto);
+        List<Request> requests = List.of(request);
+        List<ItemDto> items = List.of(itemDto);
 
         when(userService.getByUserId((userId))).thenReturn(user);
         when(itemMapper.itemListToItemDtoList(any())).thenReturn(items);
         when(requestMapper.requestToRequestWithItemDto(any())).thenReturn(requestWithItemDto);
         when(requestRepository.findAllByUserIdNotOrderByCreatedDesc(any(), any())).thenReturn(requests);
 
-        List<RequestWithItemDto> result = requestService.getAllRequest(userId, PaginationMapper.toMakePage(1,1));
+        List<RequestWithItemDto> result = requestService.getAllRequest(userId, PaginationMapper.toMakePage(1, 1));
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0).getItems().get(0)).isEqualTo(itemDto);
     }
 
     @Test
     void getAllRequests_shouldReturnValidationException() {
-        assertThatThrownBy(()->
-                requestService.getAllRequest(userId, PaginationMapper.toMakePage(0,0))).
+        assertThatThrownBy(() ->
+                requestService.getAllRequest(userId, PaginationMapper.toMakePage(0, 0))).
                 isInstanceOf(ValidationException.class);
 
     }
 
     @Test
     void getByRequestIdIdWithItem_shouldReturnRequest() {
-        List<ItemDto> items = List.of( itemDto);
+        List<ItemDto> items = List.of(itemDto);
 
         when(userService.getByUserId((userId))).thenReturn(user);
         when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
@@ -172,7 +172,7 @@ public class RequestServerTest {
 
         when(userService.getByUserId((userId))).thenReturn(user);
         when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
-        assertThatThrownBy(()-> requestService.getByRequestIdWithItem(requestId, userId))
+        assertThatThrownBy(() -> requestService.getByRequestIdWithItem(requestId, userId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 }

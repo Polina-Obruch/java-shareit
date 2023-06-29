@@ -114,6 +114,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(usersDto)));
     }
+
     @Test
     void getAll_shouldReturnEmptyList() throws Exception {
         List<UserDto> usersDto = Collections.emptyList();

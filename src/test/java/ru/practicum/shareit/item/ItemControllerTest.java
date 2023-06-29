@@ -96,7 +96,7 @@ public class ItemControllerTest {
 
     @Test
     void update_shouldUpdateItem() throws Exception {
-        UpdateItemDto updateItemDto = new UpdateItemDto(itemId,itemDto.getName(), itemDto.getDescription(), true);
+        UpdateItemDto updateItemDto = new UpdateItemDto(itemId, itemDto.getName(), itemDto.getDescription(), true);
 
         when(itemMapper.itemToItemDto(any())).thenReturn(itemDto);
 
@@ -111,7 +111,7 @@ public class ItemControllerTest {
 
     @Test
     void update_shouldReturnNotFound() throws Exception {
-        UpdateItemDto updateItemDto = new UpdateItemDto(itemId,itemDto.getName(), itemDto.getDescription(), true);
+        UpdateItemDto updateItemDto = new UpdateItemDto(itemId, itemDto.getName(), itemDto.getDescription(), true);
 
         when(itemMapper.itemToItemDto(any())).thenThrow(new EntityNotFoundException(""));
 

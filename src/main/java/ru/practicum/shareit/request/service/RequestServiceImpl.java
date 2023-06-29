@@ -56,8 +56,8 @@ public class RequestServiceImpl implements RequestService {
         log.info("Выдача всех запросов");
         //проверка наличия пользователя отправившего запрос
         userService.getByUserId(userId);
-        return requestRepository.findAllByUserIdNotOrderByCreatedDesc(userId,pageable).
-                stream().map(this:: addItemsForRequest).collect(Collectors.toList());
+        return requestRepository.findAllByUserIdNotOrderByCreatedDesc(userId, pageable).
+                stream().map(this::addItemsForRequest).collect(Collectors.toList());
     }
 
     @Override

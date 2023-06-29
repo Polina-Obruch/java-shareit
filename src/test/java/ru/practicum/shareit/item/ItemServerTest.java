@@ -30,21 +30,21 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ItemServerTest {
     @Mock
-    private  BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
     @Mock
-    private  ItemRepository itemRepository;
+    private ItemRepository itemRepository;
     @Mock
-    private  UserService userService;
+    private UserService userService;
     @Mock
-    private  BookingService bookingService;
+    private BookingService bookingService;
     @Mock
-    private  BookingMapper bookingMapper;
+    private BookingMapper bookingMapper;
     @Mock
-    private  CommentRepository commentRepository;
+    private CommentRepository commentRepository;
     @Mock
-    private  CommentMapper commentMapper ;
+    private CommentMapper commentMapper;
     @Mock
-    private  RequestService requestService;
+    private RequestService requestService;
 
     @InjectMocks
     private ItemServiceImpl itemService;
@@ -64,8 +64,8 @@ public class ItemServerTest {
             "description",
             true,
             null,
-            new BookingShortDto(2L,2L),
-            new BookingShortDto(3L,2L),
+            new BookingShortDto(2L, 2L),
+            new BookingShortDto(3L, 2L),
             null,
             null);
 

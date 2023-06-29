@@ -54,7 +54,7 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam(required = false) String text,
                                 @RequestParam(required = false) Integer from,
                                 @RequestParam(required = false) Integer size) {
-        return itemMapper.itemListToItemDtoList(itemService.search(text,PaginationMapper.toMakePage(from, size)));
+        return itemMapper.itemListToItemDtoList(itemService.search(text, PaginationMapper.toMakePage(from, size)));
     }
 
     @PostMapping("/{itemId}/comment")
@@ -62,7 +62,7 @@ public class ItemController {
             @PathVariable long itemId,
             @RequestHeader(name = USER_ID_HEADER) long userId,
             @Valid @RequestBody AddCommentDto addCommentDto
-            ) {
+    ) {
         return commentMapper.commentToCommentDto(
                 itemService.addComment(itemId, userId, commentMapper.addCommentDtoToComment(addCommentDto)));
     }

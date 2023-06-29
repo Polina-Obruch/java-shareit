@@ -95,7 +95,7 @@ public class UserServiceTest {
 
     @Test
     void getAll_shouldReturnListOfUsers() {
-        List<User> users = List.of( user);
+        List<User> users = List.of(user);
 
         when(userRepository.findAll()).thenReturn(users);
 

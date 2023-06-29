@@ -12,6 +12,6 @@ public interface RequestMapper {
 
     RequestAnswerDto requestToRequestAnswerDto(Request request);
 
-    RequestWithItemDto requestToRequestWithItemDto (Request request);
+    RequestWithItemDto requestToRequestWithItemDto(Request request);
 
 }

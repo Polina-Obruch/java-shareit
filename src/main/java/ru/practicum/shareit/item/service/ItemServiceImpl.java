@@ -51,8 +51,8 @@ public class ItemServiceImpl implements ItemService {
         log.info("Добавление вещи");
         item.setOwner(userService.getByUserId(userId));
         if (requestId != null) {
-           Request request = requestService.getByRequestId(requestId);
-           item.setRequest(request);
+            Request request = requestService.getByRequestId(requestId);
+            item.setRequest(request);
         }
         return itemRepository.save(item);
     }
