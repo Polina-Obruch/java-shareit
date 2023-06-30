@@ -142,8 +142,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public Comment addComment(Long itemId, Long userId, Comment comment) {
-
-        Item item = this.getByItemId(itemId, userId);
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
         User user = userService.getByUserId(userId);
         List<Booking> bookings = bookingService.getAllBookingByBookerId(userId);
 

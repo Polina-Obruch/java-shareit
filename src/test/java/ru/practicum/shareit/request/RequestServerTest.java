@@ -98,9 +98,8 @@ public class RequestServerTest {
     void add_shouldThrowEntityNotFoundExceptionIfUserIsNotExists() {
         when(userService.getByUserId(userId)).thenThrow(EntityNotFoundException.class);
 
-        assertThatThrownBy(() -> {
-            requestService.add(userId, request);
-        }).isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> requestService.add(userId, request))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -169,7 +168,6 @@ public class RequestServerTest {
 
     @Test
     void getByRequestIdIdWithItem_shouldThrowEntityNotFoundException() {
-
         when(userService.getByUserId((userId))).thenReturn(user);
         when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> requestService.getByRequestIdWithItem(requestId, userId))
