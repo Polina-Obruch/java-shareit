@@ -36,7 +36,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServerTest {
@@ -212,6 +212,42 @@ public class ItemServerTest {
     }
 
     @Test
+    void update_shouldUpdateDescription() {
+        Item newItem = Item.builder()
+                .id(1L)
+                .name(null)
+                .description("description")
+                .available(null)
+                .build();
+        when(userService.getByUserId(userId)).thenReturn(user);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
+        when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+
+        Item updateItem = itemService.update(itemId, userId, newItem);
+
+        assertThat(updateItem.getDescription()).isEqualTo(newItem.getDescription());
+    }
+
+    @Test
+    void update_shouldUpdateAvailable() {
+        Item newItem = Item.builder()
+                .id(1L)
+                .name(null)
+                .description(null)
+                .available(false)
+                .build();
+        when(userService.getByUserId(userId)).thenReturn(user);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
+        when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+
+        Item updateItem = itemService.update(itemId, userId, newItem);
+
+        assertThat(updateItem.getAvailable()).isEqualTo(newItem.getAvailable());
+    }
+
+    @Test
     void getByItemId_shouldReturnItem() {
         List<Booking> bookings = List.of(booking);
 
@@ -226,6 +262,15 @@ public class ItemServerTest {
 
         assertThat(item2.getComments().get(0)).isEqualTo(comment);
         assertThat(item2.getNextBooking().getId()).isEqualTo(bookingShortDto.getId());
+    }
+
+    @Test
+    void getByItemId_shouldThrowEntityNotFoundException() {
+        List<Booking> bookings = List.of(booking);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.getByItemId(itemId, userId)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -270,18 +315,27 @@ public class ItemServerTest {
         assertThat(comment.getItem().getId()).isEqualTo(item.getId());
         assertThat(comment.getId()).isEqualTo(newComment.getId());
         assertThat(comment.getText()).isEqualTo(newComment.getText());
-
     }
 
     @Test
-    void comment_shouldReturnValidationException() {
+    void comment_shouldThrowValidationException() {
         Comment newComment = new Comment(1L, "newComment", null, null, null);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(userService.getByUserId(userId)).thenReturn(user);
 
         when(bookingService.getAllBookingByBookerId(userId)).thenReturn(Collections.emptyList());
 
-        assertThatThrownBy(() -> itemService.addComment(itemId, userId, newComment)).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> itemService.addComment(itemId, userId, newComment))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void comment_shouldThrowEntityNotFoundException() {
+        Comment newComment = new Comment(1L, "newComment", null, null, null);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.addComment(itemId, userId, newComment))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
 }
