@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -111,5 +112,11 @@ public class BookingMapperTest {
     void bookingToBookingAnswerDto_shouldReturnNull() {
         BookingAnswerDto dto = bookingMapper.bookingToBookingAnswerDto(null);
         assertThat(dto).isEqualTo(null);
+    }
+
+    @Test
+    void bookingListToListBookingAnswerDto() {
+        List<BookingAnswerDto> list = bookingMapper.bookingListToListBookingAnswerDto(List.of(booking));
+        assertThat(list.get(0).getId()).isEqualTo(booking.getId());
     }
 }
