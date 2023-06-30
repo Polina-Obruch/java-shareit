@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 import ru.practicum.shareit.booking.dto.BookingAnswerDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -100,5 +101,19 @@ public class BookingMapperTest {
     void bookingListToListBookingAnswerDto() {
         List<BookingAnswerDto> list = bookingMapper.bookingListToListBookingAnswerDto(List.of(booking));
         assertThat(list.get(0).getId()).isEqualTo(booking.getId());
+    }
+
+    @Test
+    void bookingRequestDtoToBooking() {
+        BookingRequestDto dto = new BookingRequestDto(bookingId, LocalDateTime.now(), LocalDateTime.now());
+        Booking booking1 = bookingMapper.bookingRequestDtoToBooking(dto);
+        assertThat(dto.getStart()).isEqualTo(booking1.getStart());
+        assertThat(dto.getEnd()).isEqualTo(booking1.getEnd());
+    }
+
+    @Test
+    void bookingRequestDtoToBooking_shouldReturnNull() {
+        Booking booking1 = bookingMapper.bookingRequestDtoToBooking(null);
+        assertThat(booking1).isEqualTo(null);
     }
 }

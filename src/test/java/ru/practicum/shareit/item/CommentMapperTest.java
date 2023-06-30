@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.item.dto.AddCommentDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -64,6 +65,18 @@ public class CommentMapperTest {
         assertThat(dto.getId()).isEqualTo(comment.getId());
         assertThat(dto.getText()).isEqualTo(comment.getText());
         assertThat(dto.getAuthorName()).isEqualTo(comment.getAuthor().getName());
+    }
+
+    @Test
+    void addCommentDtoToComment() {
+        Comment comment1 = commentMapper.addCommentDtoToComment(new AddCommentDto("text"));
+        assertThat(comment1.getText()).isEqualTo("text");
+    }
+
+    @Test
+    void addCommentDtoToComment_shouldNull() {
+        Comment comment1 = commentMapper.addCommentDtoToComment(null);
+        assertThat(comment1).isEqualTo(null);
     }
 
 }

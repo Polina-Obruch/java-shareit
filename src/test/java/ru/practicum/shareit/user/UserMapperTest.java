@@ -8,6 +8,7 @@ import org.mockito.Spy;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.RequestUserDto;
+import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -75,5 +76,12 @@ public class UserMapperTest {
     void userListToUserDtoList() {
         List<UserDto> list = userMapper.userListToUserDtoList(List.of(user));
         assertThat(list.get(0).getEmail()).isEqualTo(user.getEmail());
+    }
+
+    @Test
+    void updateUserDtoToUser() {
+        UpdateUserDto dto = new UpdateUserDto("newName", "new.doe@mail.com");
+        User user1 = userMapper.updateUserDtoToUser(dto);
+        assertThat(user1.getName()).isEqualTo(dto.getName());
     }
 }
