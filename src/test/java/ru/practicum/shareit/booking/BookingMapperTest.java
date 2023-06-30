@@ -26,9 +26,7 @@ public class BookingMapperTest {
     private Long bookingId;
 
     private User user;
-    private User user1;
     private Item item;
-    private Item item1;
     private Booking booking;
     private Booking newBooking;
 
@@ -43,28 +41,12 @@ public class BookingMapperTest {
                 "John",
                 "john.doe@mail.com");
 
-        user1 = new User(
-                2L,
-                "Jo",
-                "jo.do@mail.com");
-
         item = new Item(
                 itemId,
                 "name",
                 "description",
                 true,
                 user,
-                new BookingShortDto(2L, 2L),
-                new BookingShortDto(3L, 2L),
-                null,
-                null);
-
-        item1 = new Item(
-                itemId,
-                "name",
-                "description",
-                true,
-                user1,
                 new BookingShortDto(2L, 2L),
                 new BookingShortDto(3L, 2L),
                 null,
