@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommentMapperTest {
     @Spy
-    CommentMapper commentMapper = Mappers.getMapper(CommentMapper.class);
+    private CommentMapper commentMapper = Mappers.getMapper(CommentMapper.class);
 
     private Long commentId;
     private Long itemId;

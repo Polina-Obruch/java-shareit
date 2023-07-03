@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
@@ -17,6 +18,8 @@ public interface ItemMapper {
     ItemDto itemToItemDto(Item item);
 
     Item updateItemDtoToItem(UpdateItemDto updateItemDto);
+
+    ItemForBookingDto itemToItemForBookingDto(Item item);
 
     List<ItemDto> itemListToItemDtoList(List<Item> itemList);
 

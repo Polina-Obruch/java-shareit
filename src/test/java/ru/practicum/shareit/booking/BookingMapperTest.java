@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 import ru.practicum.shareit.booking.dto.BookingAnswerDto;
+import ru.practicum.shareit.booking.dto.BookingNewAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -29,7 +30,6 @@ public class BookingMapperTest {
     private User user;
     private Item item;
     private Booking booking;
-    private Booking newBooking;
 
     @BeforeEach
     void setUp() {
@@ -60,14 +60,6 @@ public class BookingMapperTest {
                 item,
                 user,
                 BookingStatus.WAITING);
-
-        newBooking = new Booking(
-                bookingId,
-                LocalDateTime.now().plusDays(1),
-                LocalDateTime.now().plusDays(2),
-                null,
-                null,
-                null);
     }
 
     @Test
@@ -115,5 +107,13 @@ public class BookingMapperTest {
     void bookingRequestDtoToBooking_shouldReturnNull() {
         Booking booking1 = bookingMapper.bookingRequestDtoToBooking(null);
         assertThat(booking1).isEqualTo(null);
+    }
+
+    @Test
+    void bookingToBookingNewAnswerDto() {
+        BookingNewAnswerDto dto = bookingMapper.bookingToBookingNewAnswerDto(booking);
+        assertThat(dto.getStart()).isEqualTo(booking.getStart());
+        assertThat(dto.getEnd()).isEqualTo(booking.getEnd());
+        assertThat(dto.getItem().getName()).isEqualTo(booking.getItem().getName());
     }
 }

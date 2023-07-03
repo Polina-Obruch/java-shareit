@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
-import ru.practicum.shareit.booking.dto.BookingShortDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.RequestAddDto;
 import ru.practicum.shareit.request.dto.RequestAnswerDto;
 import ru.practicum.shareit.request.dto.RequestWithItemDto;
@@ -19,37 +17,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class RequestMapperTest {
     @Spy
-    RequestMapper requestMapper = Mappers.getMapper(RequestMapper.class);
+    private RequestMapper requestMapper = Mappers.getMapper(RequestMapper.class);
 
     private Long userId;
-    private Long itemId;
     private Long requestId;
 
     private User user;
-    private Item item;
     private Request request;
 
     @BeforeEach
     void setUp() {
         userId = 1L;
-        itemId = 1L;
         requestId = 1L;
 
         user = new User(
                 userId,
                 "John",
                 "john.doe@mail.com");
-
-        item = new Item(
-                itemId,
-                "name",
-                "description",
-                true,
-                user,
-                new BookingShortDto(2L, 2L),
-                new BookingShortDto(3L, 2L),
-                null,
-                null);
 
         request = new Request(
                 requestId,

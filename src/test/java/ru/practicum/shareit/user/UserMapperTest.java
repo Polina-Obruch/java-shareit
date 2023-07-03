@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 
-import ru.practicum.shareit.booking.dto.BookingShortDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.RequestUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -19,35 +17,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserMapperTest {
     @Spy
-    UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+    private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     private Long userId;
-    private Long itemId;
-
     private User user;
-    private Item item;
     private RequestUserDto requestUserDto;
 
     @BeforeEach
     void setUp() {
         userId = 1L;
-        itemId = 1L;
 
         user = new User(
                 userId,
                 "John",
                 "john.doe@mail.com");
-
-        item = new Item(
-                itemId,
-                "name",
-                "description",
-                true,
-                user,
-                new BookingShortDto(2L, 2L),
-                new BookingShortDto(3L, 2L),
-                null,
-                null);
 
         requestUserDto = new RequestUserDto("name", "description");
     }
@@ -73,6 +56,12 @@ public class UserMapperTest {
     }
 
     @Test
+    void requestUserDtoToUser_shouldReturnNull() {
+        User user1 = userMapper.requestUserDtoToUser(null);
+        assertThat(user1).isEqualTo(null);
+    }
+
+    @Test
     void userListToUserDtoList() {
         List<UserDto> list = userMapper.userListToUserDtoList(List.of(user));
         assertThat(list.get(0).getEmail()).isEqualTo(user.getEmail());
@@ -83,5 +72,11 @@ public class UserMapperTest {
         UpdateUserDto dto = new UpdateUserDto("newName", "new.doe@mail.com");
         User user1 = userMapper.updateUserDtoToUser(dto);
         assertThat(user1.getName()).isEqualTo(dto.getName());
+    }
+
+    @Test
+    void updateUserDtoToUser_shouldReturnNull() {
+        User user1 = userMapper.updateUserDtoToUser(null);
+        assertThat(user1).isEqualTo(null);
     }
 }

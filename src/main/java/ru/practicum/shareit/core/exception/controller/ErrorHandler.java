@@ -40,7 +40,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleDuplicateLike(final DuplicateEmailException exp) {
+    public ErrorResponse handleDuplicateEmailException(final DuplicateEmailException exp) {
         log.error(exp.getMessage());
         return new ErrorResponse(exp.getMessage());
     }

@@ -9,7 +9,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
 import ru.practicum.shareit.core.exception.FailIdException;
 import ru.practicum.shareit.core.exception.ValidationException;
@@ -19,9 +18,9 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -36,12 +35,11 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
-    private final UserService userService;
-    private final BookingService bookingService;
+    private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final RequestService requestService;
+    private final RequestRepository requestRepository;
 
     //В методе вызывается другой @Transactional-метод.
     // Все будет в одной (существующей) транзакции так как по умолчанию : Propagation.REQUIRED
@@ -49,9 +47,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item add(Long userId, Long requestId, Item item) {
         log.info("Добавление вещи");
-        item.setOwner(userService.getByUserId(userId));
+        item.setOwner(userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId))));
         if (requestId != null) {
-            Request request = requestService.getByRequestId(requestId);
+            Request request = requestRepository.findById(requestId).orElseThrow(()
+                    -> new EntityNotFoundException(String.format("Запрос с id = %d не найден в базе", requestId)));
             item.setRequest(request);
         }
         return itemRepository.save(item);
@@ -62,7 +62,8 @@ public class ItemServiceImpl implements ItemService {
     public Item update(Long itemId, Long userId, Item item) {
         log.info(String.format("Обновление вещи c id = %d", itemId));
         //Если пользователя или вещи нет в базе - ошибка NotFound
-        User user = userService.getByUserId(userId);
+        User user = userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId)));
         Item updateItem = this.getByItemId(itemId, userId);
         User owner = updateItem.getOwner();
 
@@ -144,8 +145,9 @@ public class ItemServiceImpl implements ItemService {
     public Comment addComment(Long itemId, Long userId, Comment comment) {
         Item item = itemRepository.findById(itemId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Предмет с id = %d не найден в базе", itemId)));
-        User user = userService.getByUserId(userId);
-        List<Booking> bookings = bookingService.getAllBookingByBookerId(userId);
+        User user = userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId)));
+        List<Booking> bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
 
         //Проверка на наличие аренды этой вещи этим пользователем
         List<Booking> bookingsForItem = bookings.stream().map(booking -> {

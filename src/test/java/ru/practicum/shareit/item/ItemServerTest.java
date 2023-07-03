@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.EntityNotFoundException;
 import ru.practicum.shareit.core.exception.FailIdException;
 import ru.practicum.shareit.core.exception.ValidationException;
@@ -24,9 +23,9 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.request.model.Request;
-import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -45,9 +44,7 @@ public class ItemServerTest {
     @Mock
     private ItemRepository itemRepository;
     @Mock
-    private UserService userService;
-    @Mock
-    private BookingService bookingService;
+    private UserRepository userRepository;
     @Mock
     private BookingMapper bookingMapper;
     @Mock
@@ -55,7 +52,7 @@ public class ItemServerTest {
     @Mock
     private CommentMapper commentMapper;
     @Mock
-    private RequestService requestService;
+    private RequestRepository requestRepository;
 
     @InjectMocks
     private ItemServiceImpl itemService;
@@ -137,17 +134,23 @@ public class ItemServerTest {
     }
 
     @Test
-    void add_shouldThrowNotFoundExceptionIfUserIsNotExists() {
-        when(userService.getByUserId(userId)).thenThrow(EntityNotFoundException.class);
+    void add_shouldThrowEntityNotFoundExceptionIfUserIsNotExists() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> itemService.add(userId, null, item)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    void create_shouldCreateItemWithRequest() {
-        when(userService.getByUserId(userId)).thenReturn(user);
+    void add_shouldThrowEntityNotFoundExceptionIfRequestIsNotExists() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(requestRepository.findById(requestId)).thenReturn(Optional.empty());
 
-        when(userService.getByUserId(userId)).thenReturn(user);
-        when(requestService.getByRequestId(requestId)).thenReturn(request);
+        assertThatThrownBy(() -> itemService.add(userId, requestId, item)).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void add_shouldCreateItemWithRequest() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
         when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
         Item newItem = itemService.add(userId, requestId, item);
@@ -164,11 +167,24 @@ public class ItemServerTest {
                 .description("newDesc")
                 .available(true)
                 .build();
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item1));
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> itemService.update(itemId, userId, newItem)).isInstanceOf(FailIdException.class);
+    }
+
+    @Test
+    void update_shouldThrowEntityNotFoundException() {
+        Item newItem = Item.builder()
+                .id(1L)
+                .name("newName")
+                .description("newDesc")
+                .available(true)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.update(itemId, userId, newItem)).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -179,7 +195,7 @@ public class ItemServerTest {
                 .description("newDesc")
                 .available(true)
                 .build();
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
         when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
@@ -199,7 +215,7 @@ public class ItemServerTest {
                 .description(null)
                 .available(null)
                 .build();
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
         when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
@@ -219,7 +235,7 @@ public class ItemServerTest {
                 .description("description")
                 .available(null)
                 .build();
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
         when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
@@ -237,7 +253,7 @@ public class ItemServerTest {
                 .description(null)
                 .available(false)
                 .build();
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(Collections.emptyList());
         when(itemRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
@@ -275,7 +291,6 @@ public class ItemServerTest {
 
     @Test
     void getByOwnerId_shouldReturnItem() {
-
         when(itemRepository.findAllByOwnerId(userId, PaginationMapper.toMakePage(1, 1))).thenReturn(List.of(item));
         when(bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(itemId, BookingStatus.APPROVED)).thenReturn(List.of(booking));
         when(bookingMapper.bookingToBookingShortDto(any())).thenReturn(bookingShortDto);
@@ -304,9 +319,10 @@ public class ItemServerTest {
     void comment_shouldReturnNewComment() {
         Comment newComment = new Comment(1L, "newComment", null, null, null);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        when(bookingService.getAllBookingByBookerId(userId)).thenReturn(List.of(booking));
+        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any()))
+                .thenReturn(List.of(booking));
 
         when(commentRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
@@ -321,16 +337,17 @@ public class ItemServerTest {
     void comment_shouldThrowValidationException() {
         Comment newComment = new Comment(1L, "newComment", null, null, null);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        when(bookingService.getAllBookingByBookerId(userId)).thenReturn(Collections.emptyList());
+        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any()))
+                .thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> itemService.addComment(itemId, userId, newComment))
                 .isInstanceOf(ValidationException.class);
     }
 
     @Test
-    void comment_shouldThrowEntityNotFoundException() {
+    void comment_shouldThrowEntityNotFoundExceptionIfNotItem() {
         Comment newComment = new Comment(1L, "newComment", null, null, null);
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
@@ -338,4 +355,13 @@ public class ItemServerTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
+    @Test
+    void comment_shouldThrowEntityNotFoundExceptionIfNotUser() {
+        Comment newComment = new Comment(1L, "newComment", null, null, null);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.addComment(itemId, userId, newComment))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
 }

@@ -13,12 +13,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingAnswerDto;
+import ru.practicum.shareit.booking.dto.BookingNewAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.exception.FailIdException;
 import ru.practicum.shareit.core.exception.controller.ErrorHandler;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -50,7 +53,9 @@ public class BookingControllerTest {
 
     private User user;
     private Item item;
+    private ItemForBookingDto itemForBookingDto;
     private BookingAnswerDto bookingAnswerDto;
+    private BookingNewAnswerDto bookingNewAnswerDto;
 
     private final Long bookerId = 1L;
     private final Long bookingId = 1L;
@@ -79,11 +84,19 @@ public class BookingControllerTest {
                 null,
                 null);
 
+        itemForBookingDto = new ItemForBookingDto(item.getId(), item.getName());
+
         bookingAnswerDto = new BookingAnswerDto(
                 bookingId,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 BookingStatus.WAITING, item, user);
+
+        bookingNewAnswerDto = new BookingNewAnswerDto(
+                bookingId,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                BookingStatus.WAITING, itemForBookingDto, user);
     }
 
     @Test
@@ -97,14 +110,14 @@ public class BookingControllerTest {
                         .content(objectMapper.writeValueAsString(bookingRequestDto1)))
                 .andExpect(status().isBadRequest());
 
-        when(bookingMapper.bookingToBookingAnswerDto(any())).thenReturn(bookingAnswerDto);
+        when(bookingService.add(anyLong(), anyLong(), any())).thenReturn(bookingNewAnswerDto);
 
         mockMvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, bookerId)
                         .content(objectMapper.writeValueAsString(bookingRequestDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(bookingAnswerDto)));
+                .andExpect(content().json(objectMapper.writeValueAsString(bookingNewAnswerDto)));
     }
 
     @Test

@@ -14,7 +14,7 @@ import ru.practicum.shareit.request.mapper.RequestMapper;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
     private final RequestRepository requestRepository;
@@ -36,7 +36,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public Request add(Long userId, Request request) {
         log.info("Создание запроса");
-        User user = userService.getByUserId(userId);
+        User user = userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId)));
         request.setCreated(LocalDateTime.now());
         request.setUser(user);
         return requestRepository.save(request);
@@ -46,7 +47,8 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestWithItemDto> getAllRequestsByOwnerId(Long ownerId) {
         log.info(String.format("Выдача запросов пользователя c id = %d", ownerId));
         //проверка наличия пользователя отправившего запрос
-        userService.getByUserId(ownerId);
+        userRepository.findById(ownerId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", ownerId)));
         return requestRepository.findAllByUserIdOrderByCreatedDesc(ownerId)
                 .stream().map(this::addItemsForRequest).collect(Collectors.toList());
     }
@@ -55,7 +57,8 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestWithItemDto> getAllRequest(Long userId, Pageable pageable) {
         log.info("Выдача всех запросов");
         //проверка наличия пользователя отправившего запрос
-        userService.getByUserId(userId);
+        userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId)));
         return requestRepository.findAllByUserIdNotOrderByCreatedDesc(userId, pageable)
                 .stream().map(this::addItemsForRequest).collect(Collectors.toList());
     }
@@ -71,7 +74,9 @@ public class RequestServiceImpl implements RequestService {
     public RequestWithItemDto getByRequestIdWithItem(Long requestId, Long userId) {
         log.info(String.format("Выдача запроса вместе с ответами id = %d", requestId));
         // проверка наличия пользователя отправившего запрос
-        userService.getByUserId(userId);
+        userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", userId)));
+
         Request request = requestRepository.findById(requestId).orElseThrow(()
                 -> new EntityNotFoundException(String.format("Запрос с id = %d не найден в базе", requestId)));
 

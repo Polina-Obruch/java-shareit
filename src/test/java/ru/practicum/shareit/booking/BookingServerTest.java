@@ -7,16 +7,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.dto.BookingNewAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.core.exception.*;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 
@@ -40,9 +44,13 @@ public class BookingServerTest {
     @Mock
     private BookingRepository bookingRepository;
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
     @Mock
     private ItemRepository itemRepository;
+    @Mock
+    private ItemMapper itemMapper;
+    @Mock
+    private BookingMapper bookingMapper;
 
     private Long userId;
     private Long itemId;
@@ -54,6 +62,8 @@ public class BookingServerTest {
     private Item item1;
     private Booking booking;
     private Booking newBooking;
+    private ItemForBookingDto itemForBookingDto;
+    private BookingNewAnswerDto bookingNewAnswerDto;
 
     @BeforeEach
     void setUp() {
@@ -108,15 +118,25 @@ public class BookingServerTest {
                 null,
                 null,
                 null);
+
+        itemForBookingDto = new ItemForBookingDto(item1.getId(), item1.getName());
+
+        bookingNewAnswerDto = new BookingNewAnswerDto(
+                bookingId,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                BookingStatus.WAITING, itemForBookingDto, user);
     }
 
     @Test
     void add_shouldCreateBooking() {
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item1));
+        when(bookingMapper.bookingToBookingNewAnswerDto(any())).thenReturn(bookingNewAnswerDto);
+        when(itemMapper.itemToItemForBookingDto(item1)).thenReturn(itemForBookingDto);
         when(bookingRepository.save(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
-        Booking booking = bookingService.add(userId, itemId, newBooking);
+        BookingNewAnswerDto booking = bookingService.add(userId, itemId, newBooking);
 
         assertThat(booking.getItem().getId()).isEqualTo(item1.getId());
         assertThat(booking.getStatus()).isEqualTo(BookingStatus.WAITING);
@@ -149,7 +169,7 @@ public class BookingServerTest {
                 .status(null)
                 .build();
 
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item1));
 
         assertThatThrownBy(() -> bookingService.add(userId, itemId, wrongTimeBooking))
@@ -161,9 +181,16 @@ public class BookingServerTest {
     }
 
     @Test
-    void add_shouldThrowEntityNotFoundException() {
-        when(userService.getByUserId(userId)).thenReturn(user);
+    void add_shouldThrowEntityNotFoundExceptionIfNotItem() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> bookingService.add(userId, itemId, newBooking))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void add_shouldThrowEntityNotFoundExceptionIfNotUser() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> bookingService.add(userId, itemId, newBooking))
                 .isInstanceOf(EntityNotFoundException.class);
     }
@@ -171,7 +198,7 @@ public class BookingServerTest {
     @Test
     void add_shouldThrowItemNotAvailableException() {
         item1.setAvailable(false);
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item1));
 
         assertThatThrownBy(() -> bookingService.add(userId, itemId, newBooking))
@@ -180,7 +207,7 @@ public class BookingServerTest {
 
     @Test
     void add_shouldThrowFailIdException() {
-        when(userService.getByUserId(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         assertThatThrownBy(() -> bookingService.add(userId, itemId, newBooking))
@@ -237,12 +264,14 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdOrderByStartDesc() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "ALL", null);
         verify(bookingRepository).findAllByBookerIdOrderByStartDesc(anyLong(), any());
     }
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "CURRENT", null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any(), any());
@@ -250,6 +279,7 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndEndBeforeOrderByStartDesc() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "PAST", null);
         verify(bookingRepository)
                 .findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any(), any());
@@ -257,6 +287,7 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStartAfterOrderByStartDesc() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "FUTURE", null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any(), any());
@@ -264,6 +295,7 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStatusOrderByStartDescWithStatusWaiting() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "WAITING", null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStatusOrderByStartDesc(1, BookingStatus.WAITING, null);
@@ -271,6 +303,7 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStatusOrderByStartDescWithStatusRejected() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         bookingService.getAllBookingByBookerId(userId, "REJECTED", null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStatusOrderByStartDesc(1, BookingStatus.REJECTED, null);
@@ -278,8 +311,16 @@ public class BookingServerTest {
 
     @Test
     void getAllBookingByBookerId_shouldThrowUnsupportedStatusException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         assertThatThrownBy(() -> bookingService.getAllBookingByBookerId(userId, "Example", null))
                 .isInstanceOf(StatusException.class);
+    }
+
+    @Test
+    void getAllBookingByBookerId_shouldThrowEntityNotFoundException() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> bookingService.getAllBookingByBookerId(userId, "Example", null))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

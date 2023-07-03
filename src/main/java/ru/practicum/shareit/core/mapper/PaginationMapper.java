@@ -1,12 +1,16 @@
 package ru.practicum.shareit.core.mapper;
 
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.core.exception.ValidationException;
 
-@NoArgsConstructor
-public class PaginationMapper {
+public class PaginationMapper extends PageRequest {
+
+    protected PaginationMapper(int page, int size, Sort sort) {
+        super(page, size, sort);
+    }
+
     public static Pageable toMakePage(Integer from, Integer size) {
         if (from == null || size == null) {
             return null;
