@@ -6,7 +6,9 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.Spy;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
 import ru.practicum.shareit.item.dto.ItemGetDto;
+import ru.practicum.shareit.item.dto.UpdateItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.Request;
@@ -29,7 +31,6 @@ public class ItemMapperTest {
     private Item item;
     private Request request;
     private ItemDto itemDto;
-    private ItemGetDto itemGetDto;
 
     @BeforeEach
     void setUp() {
@@ -109,4 +110,20 @@ public class ItemMapperTest {
         List<ItemGetDto> list = itemMapper.itemListToItemGetDtoList(List.of(item));
         assertThat(list.get(0).getId()).isEqualTo(item.getId());
     }
+
+    @Test
+    void itemToItemForBookingDto() {
+        ItemForBookingDto dto = itemMapper.itemToItemForBookingDto(item);
+        assertThat(dto.getId()).isEqualTo(item.getId());
+        assertThat(dto.getName()).isEqualTo(item.getName());
+    }
+
+    @Test
+    void updateItemDtoToItem() {
+        UpdateItemDto updateItemDto = new UpdateItemDto(2L,"name","text",true);
+        Item item1 = itemMapper.updateItemDtoToItem(updateItemDto);
+        assertThat(updateItemDto.getId()).isEqualTo(item1.getId());
+        assertThat(updateItemDto.getName()).isEqualTo(item1.getName());
+    }
+
 }
