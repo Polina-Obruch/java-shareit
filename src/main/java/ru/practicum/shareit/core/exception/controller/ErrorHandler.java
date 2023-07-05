@@ -31,7 +31,7 @@ public class ErrorHandler {
         return new ValidationErrorResponse(errors);
     }
 
-    @ExceptionHandler (value = {ItemNotAvailableException.class, ValidationException.class, StatusException.class})
+    @ExceptionHandler(value = {ItemNotAvailableException.class, ValidationException.class, StatusException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final RuntimeException exp) {
         log.error(exp.getMessage());
@@ -40,12 +40,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleDuplicateLike(final DuplicateEmailException exp) {
+    public ErrorResponse handleDuplicateEmailException(final DuplicateEmailException exp) {
         log.error(exp.getMessage());
         return new ErrorResponse(exp.getMessage());
     }
 
-    @ExceptionHandler (value = {FailIdException.class, EntityNotFoundException.class})
+    @ExceptionHandler(value = {FailIdException.class, EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleFailId(final RuntimeException exp) {
         log.error(exp.getMessage());
