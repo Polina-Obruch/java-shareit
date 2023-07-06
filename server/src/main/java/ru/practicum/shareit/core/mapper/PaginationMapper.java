@@ -16,7 +16,7 @@ public class PaginationMapper extends PageRequest {
             return null;
         }
 
-        if (size <= 0 || from < 0) {
+       if (size <= 0 || from < 0) {
             throw new ValidationException("Уточнчите правильность параметров отображения");
         }
 

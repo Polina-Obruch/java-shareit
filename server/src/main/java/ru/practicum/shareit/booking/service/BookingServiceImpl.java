@@ -97,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getAllBookingByOwnerId(Long ownerId, String state, Pageable pageable) {
+    public List<Booking> getAllBookingByOwnerId(Long ownerId, State state, Pageable pageable) {
         List<Item> items = itemRepository.findAllByOwnerId(ownerId);
         // Если нет вещей этого пользователя в базе - ошибка
         if (items.isEmpty()) {
@@ -105,53 +105,45 @@ public class BookingServiceImpl implements BookingService {
                     "Владелец вещей с id = %d отсутствует в базе", ownerId));
         }
 
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    return bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pageable);
-                case CURRENT:
-                    return bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now(), pageable);
-                case PAST:
-                    return bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now(), pageable);
-                case FUTURE:
-                    return bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now(), pageable);
-                case WAITING:
-                    return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING, pageable);
-                case REJECTED:
-                    return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED, pageable);
-                default:
-                    throw new StatusException();
-            }
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
+        switch (state) {
+            case ALL:
+                return bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pageable);
+            case CURRENT:
+                return bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now(), pageable);
+            case PAST:
+                return bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now(), pageable);
+            case FUTURE:
+                return bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now(), pageable);
+            case WAITING:
+                return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING, pageable);
+            case REJECTED:
+                return bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED, pageable);
+            default:
+                throw new StatusException();
         }
     }
 
     @Override
-    public List<Booking> getAllBookingByBookerId(Long bookerId, String state, Pageable pageable) {
+    public List<Booking> getAllBookingByBookerId(Long bookerId, State state, Pageable pageable) {
         //Проверка наличия такого пользователя в системе
         userRepository.findById(bookerId).orElseThrow(()
                 -> new EntityNotFoundException(String.format("Пользователь с id = %d не найден в базе", bookerId)));
 
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    return bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId, pageable);
-                case CURRENT:
-                    return bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now(), pageable);
-                case PAST:
-                    return bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now(), pageable);
-                case FUTURE:
-                    return bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now(), pageable);
-                case WAITING:
-                    return bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING, pageable);
-                case REJECTED:
-                    return bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.REJECTED, pageable);
-                default:
-                    throw new StatusException();
-            }
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
+        switch (state) {
+            case ALL:
+                return bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId, pageable);
+            case CURRENT:
+                return bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now(), pageable);
+            case PAST:
+                return bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now(), pageable);
+            case FUTURE:
+                return bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now(), pageable);
+            case WAITING:
+                return bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING, pageable);
+            case REJECTED:
+                return bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.REJECTED, pageable);
+            default:
+                throw new StatusException();
         }
     }
 

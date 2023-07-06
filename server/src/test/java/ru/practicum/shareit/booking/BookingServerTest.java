@@ -12,6 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.core.exception.*;
@@ -265,14 +266,14 @@ public class BookingServerTest {
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdOrderByStartDesc() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "ALL", null);
+        bookingService.getAllBookingByBookerId(userId, State.ALL, null);
         verify(bookingRepository).findAllByBookerIdOrderByStartDesc(anyLong(), any());
     }
 
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "CURRENT", null);
+        bookingService.getAllBookingByBookerId(userId, State.CURRENT, null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any(), any());
     }
@@ -280,7 +281,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndEndBeforeOrderByStartDesc() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "PAST", null);
+        bookingService.getAllBookingByBookerId(userId, State.PAST, null);
         verify(bookingRepository)
                 .findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(), any(), any());
     }
@@ -288,7 +289,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStartAfterOrderByStartDesc() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "FUTURE", null);
+        bookingService.getAllBookingByBookerId(userId, State.FUTURE, null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStartAfterOrderByStartDesc(anyLong(), any(), any());
     }
@@ -296,7 +297,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStatusOrderByStartDescWithStatusWaiting() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "WAITING", null);
+        bookingService.getAllBookingByBookerId(userId, State.WAITING, null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStatusOrderByStartDesc(1, BookingStatus.WAITING, null);
     }
@@ -304,36 +305,29 @@ public class BookingServerTest {
     @Test
     void getAllBookingByBookerId_shouldCallFindAllByBookerIdAndStatusOrderByStartDescWithStatusRejected() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        bookingService.getAllBookingByBookerId(userId, "REJECTED", null);
+        bookingService.getAllBookingByBookerId(userId, State.REJECTED, null);
         verify(bookingRepository)
                 .findAllByBookerIdAndStatusOrderByStartDesc(1, BookingStatus.REJECTED, null);
     }
 
     @Test
-    void getAllBookingByBookerId_shouldThrowUnsupportedStatusException() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        assertThatThrownBy(() -> bookingService.getAllBookingByBookerId(userId, "Example", null))
-                .isInstanceOf(StatusException.class);
-    }
-
-    @Test
     void getAllBookingByBookerId_shouldThrowEntityNotFoundException() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> bookingService.getAllBookingByBookerId(userId, "Example", null))
+        assertThatThrownBy(() -> bookingService.getAllBookingByBookerId(userId, State.ALL, null))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdOrderByStartDesc() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "ALL", null);
+        bookingService.getAllBookingByOwnerId(userId, State.ALL, null);
         verify(bookingRepository).findAllByItemOwnerIdOrderByStartDesc(anyLong(), any());
     }
 
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "CURRENT", null);
+        bookingService.getAllBookingByOwnerId(userId, State.CURRENT, null);
         verify(bookingRepository)
                 .findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(anyLong(), any(), any(), any());
     }
@@ -341,7 +335,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdAndEndBeforeOrderByStartDesc() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "PAST", null);
+        bookingService.getAllBookingByOwnerId(userId, State.PAST, null);
         verify(bookingRepository)
                 .findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(anyLong(), any(), any());
     }
@@ -349,7 +343,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdAndStartAfterOrderByStartDesc() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "FUTURE", null);
+        bookingService.getAllBookingByOwnerId(userId, State.FUTURE, null);
         verify(bookingRepository)
                 .findAllByItemOwnerIdAndStartAfterOrderByStartDesc(anyLong(), any(), any());
     }
@@ -357,7 +351,7 @@ public class BookingServerTest {
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdAndStatusOrderByStartDescWithStatusWaiting() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "WAITING", null);
+        bookingService.getAllBookingByOwnerId(userId, State.WAITING, null);
         verify(bookingRepository)
                 .findAllByItemOwnerIdAndStatusOrderByStartDesc(1, BookingStatus.WAITING, null);
     }
@@ -365,24 +359,15 @@ public class BookingServerTest {
     @Test
     void getAllBookingByOwnerId_shouldCallFindAllByItemOwnerIdAndStatusOrderByStartDescWithStatusRejected() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        bookingService.getAllBookingByOwnerId(userId, "REJECTED", null);
+        bookingService.getAllBookingByOwnerId(userId, State.REJECTED, null);
         verify(bookingRepository)
                 .findAllByItemOwnerIdAndStatusOrderByStartDesc(1, BookingStatus.REJECTED, null);
     }
 
     @Test
-    void getAllBookingByOwnerId_shouldThrowUnsupportedStatusException() {
-        when(itemRepository.findAllByOwnerId(userId)).thenReturn(List.of(item));
-        assertThatThrownBy(() -> bookingService.getAllBookingByOwnerId(userId, "Example", null))
-                .isInstanceOf(StatusException.class);
-    }
-
-    @Test
     void getAllBookingByOwnerId_shouldThrowFailIdException() {
         when(itemRepository.findAllByOwnerId(userId)).thenReturn(Collections.emptyList());
-        assertThatThrownBy(() -> bookingService.getAllBookingByOwnerId(userId, "Example", null))
+        assertThatThrownBy(() -> bookingService.getAllBookingByOwnerId(userId, State.ALL, null))
                 .isInstanceOf(FailIdException.class);
     }
-
-
 }

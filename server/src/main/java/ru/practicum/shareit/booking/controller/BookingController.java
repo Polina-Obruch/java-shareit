@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingNewAnswerDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.core.mapper.PaginationMapper;
 
@@ -48,7 +49,7 @@ public class BookingController {
 
     @GetMapping
     public List<BookingAnswerDto> getAllByBooker(@RequestHeader(name = USER_ID_HEADER) long bookerId,
-                                                 @RequestParam(defaultValue = "ALL") String state,
+                                                 @RequestParam(defaultValue = "ALL") State state,
                                                  @RequestParam(required = false) Integer from,
                                                  @RequestParam(required = false) Integer size) {
         log.info("Запрос на выдачу списка бронирований пользователя");
@@ -58,7 +59,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingAnswerDto> getAllByOwner(@RequestHeader(name = USER_ID_HEADER) long ownerId,
-                                                @RequestParam(defaultValue = "ALL") String state,
+                                                @RequestParam(defaultValue = "ALL") State state,
                                                 @RequestParam(required = false) Integer from,
                                                 @RequestParam(required = false) Integer size) {
         log.info("Запрос на выдачу списка бронирований для всех предметов владельца");

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -18,8 +20,10 @@ public class BookingRequestDto {
     private Long itemId;
 
     @NotNull(message = "Необходимо указать время начала бронирования")
+    @FutureOrPresent(message = "Время начала бронирования должно быть в будущем")
     private LocalDateTime start;
 
     @NotNull(message = "Необходимо указать время окончания бронирования")
+    @Future(message = "Время окончания бронирования должно быть в будущем")
     private LocalDateTime end;
 }
