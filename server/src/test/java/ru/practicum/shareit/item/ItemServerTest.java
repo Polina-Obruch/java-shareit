@@ -291,7 +291,7 @@ public class ItemServerTest {
 
     @Test
     void getByOwnerId_shouldReturnItem() {
-        when(itemRepository.findAllByOwnerId(userId, PaginationMapper.toMakePage(1, 1))).thenReturn(List.of(item));
+        when(itemRepository.findAllByOwnerIdOrderById(userId, PaginationMapper.toMakePage(1, 1))).thenReturn(List.of(item));
         when(bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(itemId, BookingStatus.APPROVED)).thenReturn(List.of(booking));
         when(bookingMapper.bookingToBookingShortDto(any())).thenReturn(bookingShortDto);
         when(commentMapper.commentListToCommentDtoList(any())).thenReturn(List.of(comment));

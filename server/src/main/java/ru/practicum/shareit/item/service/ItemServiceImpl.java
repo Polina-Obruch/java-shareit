@@ -117,7 +117,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<Item> getByOwnerId(Long ownerId, Pageable pageable) {
         log.info(String.format("Выдача вещей владельца с id = %d", ownerId));
-        List<Item> items = itemRepository.findAllByOwnerId(ownerId, pageable);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(ownerId, pageable);
 
         return items.stream().map(item -> {
             List<Booking> bookings = bookingRepository.findAllByItemIdAndStatusOrderByStartAsc(item.getId(), BookingStatus.APPROVED);
