@@ -9,7 +9,6 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.core.exception.StatusException;
 import ru.practicum.shareit.core.exception.model.ErrorResponse;
 import ru.practicum.shareit.core.exception.model.ValidationErrorResponse;
 
@@ -30,13 +29,6 @@ public class ErrorHandler {
                         Objects.requireNonNull(DefaultMessageSourceResolvable::getDefaultMessage)));
         log.error(errors.toString());
         return new ValidationErrorResponse(errors);
-    }
-
-    @ExceptionHandler(value = {StatusException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final RuntimeException exp) {
-        log.error(exp.getMessage());
-        return new ErrorResponse(exp.getMessage());
     }
 
     @ExceptionHandler
