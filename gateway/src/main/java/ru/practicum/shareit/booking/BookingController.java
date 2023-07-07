@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.booking.model.State;
-import ru.practicum.shareit.core.exception.StatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -59,11 +57,7 @@ public class BookingController {
                                                  @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
 
         log.info("Запрос на создание броннирования - сервер gateway");
-        try {
-            return bookingClient.getAllByBooker(bookerId, State.valueOf(state), from, size);
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
-        }
+        return bookingClient.getAllByBooker(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
@@ -73,10 +67,6 @@ public class BookingController {
                                                 @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
 
         log.info("Запрос на создание броннирования - сервер gateway");
-        try {
-            return bookingClient.getAllByOwner(ownerId, State.valueOf(state), from, size);
-        } catch (IllegalArgumentException exp) {
-            throw new StatusException();
-        }
+        return bookingClient.getAllByOwner(ownerId, state, from, size);
     }
 }

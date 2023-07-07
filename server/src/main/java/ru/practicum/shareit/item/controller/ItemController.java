@@ -64,11 +64,9 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto comment(
-            @PathVariable long itemId,
-            @RequestHeader(name = USER_ID_HEADER) long userId,
-            @RequestBody AddCommentDto addCommentDto
-    ) {
+    public CommentDto comment(@PathVariable long itemId,
+                              @RequestHeader(name = USER_ID_HEADER) long userId,
+                              @RequestBody AddCommentDto addCommentDto) {
         log.info("Запрос на создание коммента для предмета");
         return commentMapper.commentToCommentDto(
                 itemService.addComment(itemId, userId, commentMapper.addCommentDtoToComment(addCommentDto)));

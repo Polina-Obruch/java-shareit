@@ -24,28 +24,32 @@ public class UserController {
     private final UserClient userClient;
 
     @PostMapping
-    public ResponseEntity<Object> add(@RequestBody @Valid  RequestUserDto dto) {
-        log.info("Запрос на создание пользователя");
+    public ResponseEntity<Object> add(@RequestBody @Valid RequestUserDto dto) {
+        log.info("Запрос на создание пользователя - сервер gateway");
         return userClient.add(dto);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable Long id, @Valid @RequestBody UpdateUserDto dto) {
+        log.info("Запрос на обновление пользователя - сервер gateway");
         return userClient.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> remove(@PathVariable Long id) {
+        log.info("Запрос на удаление пользователя - сервер gateway");
         return userClient.remove(id);
     }
 
     @GetMapping
     public ResponseEntity<Object> getAll() {
+        log.info("Запрос на выдачу всех пользователей - сервер gateway");
         return userClient.getAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getById(@PathVariable Long id) {
+        log.info("Запрос на выдачу пользователя - сервер gateway");
         return userClient.getByUserId(id);
     }
 }
